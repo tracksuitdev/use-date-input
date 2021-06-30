@@ -28,10 +28,9 @@
     }
   },
   "prettier": {
-    "printWidth": 80,
-    "semi": true,
-    "singleQuote": true,
-    "trailingComma": "es5"
+    "printWidth": 120,
+    "trailingComma": "es5",
+    "jsxBracketSameLine": true
   },
   "name": "use-date-input",
   "author": "tracksuitdev",
@@ -57,5 +56,9 @@
     "tsdx": "^0.14.1",
     "tslib": "^2.3.0",
     "typescript": "^4.3.4"
+  },
+  "dependencies": {
+    "date-fns": "^2.22.1",
+    "use-imask": "^1.0.1"
   }
 }
