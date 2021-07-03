@@ -5,11 +5,11 @@ import { useIMask } from "use-imask";
 
 type MaskedDateOptions = IMask.MaskedDateOptions;
 
-type UseDateInputProps = {
+export type UseDateInputProps = {
   value?: Date;
   dateFormat: string;
   onComplete?: (value?: Date) => void;
-  maskBlocks: MaskedDateOptions["blocks"];
+  maskBlocks?: MaskedDateOptions["blocks"];
 };
 
 function parseIncomplete(value: string, dateFormat: string) {
@@ -46,7 +46,7 @@ export function useDateInput({ value, dateFormat, onComplete, maskBlocks }: UseD
   const onKeyPress: KeyboardEventHandler = event => {
     if (event.key === "Enter") {
       const date = parseIncomplete(inputValue, dateFormat);
-      if (date.toString() === "Invalid Date") {
+      if (date.toString() !== "Invalid Date") {
         setInputValue(format(date, dateFormat));
       }
       event.preventDefault();
