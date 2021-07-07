@@ -3,17 +3,16 @@ import {
   addMonths,
   addWeeks,
   addYears,
-  differenceInCalendarWeeks,
   eachDayOfInterval,
+  eachMonthOfInterval,
   eachYearOfInterval,
-  endOfMonth,
-  endOfWeek,
   endOfYear,
   isSameMonth,
   startOfDay,
   startOfMonth,
   startOfWeek,
   startOfYear,
+  subDays,
   subMonths,
   subYears,
 } from "date-fns";
@@ -35,10 +34,9 @@ export type UseDatepickerDay = {
 const WEEKS_IN_CALENDAR_MONTH = 6;
 
 function getCalendarDays(currentDate: Date, weekStartsOn: 0 | 1 | 2 | 3 | 4 | 5 | 6): UseDatepickerDay[] {
-  const start = startOfWeek(currentDate, { weekStartsOn });
-  let end = endOfWeek(endOfMonth(currentDate), { weekStartsOn });
-  const weeks = differenceInCalendarWeeks(end, start, { weekStartsOn });
-  end = addWeeks(end, WEEKS_IN_CALENDAR_MONTH - weeks);
+  const options = { weekStartsOn };
+  const start = startOfWeek(currentDate, options);
+  const end = subDays(addWeeks(start, WEEKS_IN_CALENDAR_MONTH), 1);
   return eachDayOfInterval({ start, end }).map(date => ({ date, inMonth: isSameMonth(date, currentDate) }));
 }
 
@@ -47,15 +45,19 @@ export function useCalendar({ value, startDate, minDate, maxDate, weekStartsOn =
     startOfMonth(startOfDay(value ?? startDate ?? minDate ?? maxDate ?? new Date()))
   );
 
+  const serializedValue = useMemo(() => value?.toDateString(), [value]);
+
+  const isSelected = useCallback((date: Date) => date.toDateString() === currentDate.toDateString(), [currentDate]);
+
   useEffect(() => {
-    if (value) {
-      setCurrentDate(startOfMonth(startOfDay(value)));
+    if (serializedValue) {
+      setCurrentDate(startOfMonth(startOfDay(new Date(serializedValue))));
     }
-  }, [value]);
+  }, [serializedValue]);
 
   const days = useMemo(() => getCalendarDays(currentDate, weekStartsOn), [currentDate, weekStartsOn]);
 
-  const months = useMemo(() => eachDayOfInterval({ start: startOfYear(currentDate), end: endOfYear(currentDate) }), [
+  const months = useMemo(() => eachMonthOfInterval({ start: startOfYear(currentDate), end: endOfYear(currentDate) }), [
     currentDate,
   ]);
 
@@ -66,23 +68,21 @@ export function useCalendar({ value, startDate, minDate, maxDate, weekStartsOn =
     return undefined;
   }, [maxDate, minDate]);
 
-  const isSelected = (date: Date) => date.toDateString() === currentDate.toDateString();
-
   const nextYear = useCallback(() => {
-    setCurrentDate(addYears(currentDate, 1));
-  }, [currentDate]);
+    setCurrentDate(currentDate => addYears(currentDate, 1));
+  }, []);
 
   const previousYear = useCallback(() => {
-    setCurrentDate(subYears(currentDate, 1));
-  }, [currentDate]);
+    setCurrentDate(currentDate => subYears(currentDate, 1));
+  }, []);
 
   const nextMonth = useCallback(() => {
-    setCurrentDate(addMonths(currentDate, 1));
-  }, [currentDate]);
+    setCurrentDate(currentDate => addMonths(currentDate, 1));
+  }, []);
 
   const previousMonth = useCallback(() => {
-    setCurrentDate(subMonths(currentDate, 1));
-  }, [currentDate]);
+    setCurrentDate(currentDate => subMonths(currentDate, 1));
+  }, []);
 
   return {
     currentDate,
@@ -101,7 +101,5 @@ export function useCalendar({ value, startDate, minDate, maxDate, weekStartsOn =
 type UseDatepickerProps = UseCalendarProps & UseDropdownProps;
 
 export function useDatepicker(props: UseDatepickerProps) {
-  const calendar = useCalendar(props);
-  const dropdown = useDropdown(props);
-  return { ...calendar, ...dropdown };
+  return { ...useCalendar(props), ...useDropdown(props) };
 }
