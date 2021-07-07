@@ -1233,6 +1233,11 @@
     "@types/react-test-renderer" ">=16.9.0"
     react-error-boundary "^3.1.0"
 
+"@tracksuitdev/use-dropdown@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@tracksuitdev/use-dropdown/-/use-dropdown-1.0.0.tgz#0b6ef0fff29a64050c348cc3f0c51037e4672435"
+  integrity sha512-UatqoEDaUWPhQEFXiF5FE/f+Y0GKn6Fyzm4yFfDbxJUSGuuhpMXuM13I1OBKvOUnQcNtT4DQC3ld7Dq1KvmDzA==
+
 "@trysound/sax@0.1.1":
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/@trysound/sax/-/sax-0.1.1.tgz#3348564048e7a2d7398c935d466c0414ebb6a669"
