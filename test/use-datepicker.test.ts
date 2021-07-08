@@ -10,11 +10,11 @@ describe("useCalendar tests", () => {
     let value = new Date("2000-01-01");
     const { result, rerender } = renderHook(() => useCalendar({ value }));
 
-    expect(format(result.current.currentDate, "yyyy-MM-dd")).toEqual("2000-01-01");
+    expect(format(result.current.focusedDate, "yyyy-MM-dd")).toEqual("2000-01-01");
     value = new Date("2001-01-01");
     rerender();
 
-    expect(format(result.current.currentDate, "yyyy-MM-dd")).toEqual("2001-01-01");
+    expect(format(result.current.focusedDate, "yyyy-MM-dd")).toEqual("2001-01-01");
   });
 
   test("days", () => {
@@ -30,7 +30,7 @@ describe("useCalendar tests", () => {
     expect(result.current.days).toHaveLength(42);
 
     act(() => {
-      result.current.setCurrentDate(new Date("2000-01-01"));
+      result.current.setFocusedDate(new Date("2000-01-01"));
     });
 
     expect(result.current.days).toHaveLength(42);
@@ -77,7 +77,7 @@ describe("useCalendar tests", () => {
       result.current.nextMonth();
     });
 
-    expect(format(result.current.currentDate, "yyyy-MM-dd")).toEqual("2000-02-01");
+    expect(format(result.current.focusedDate, "yyyy-MM-dd")).toEqual("2000-02-01");
   });
 
   test("previous month", () => {
@@ -88,7 +88,7 @@ describe("useCalendar tests", () => {
       result.current.previousMonth();
     });
 
-    expect(format(result.current.currentDate, "yyyy-MM-dd")).toEqual("1999-12-01");
+    expect(format(result.current.focusedDate, "yyyy-MM-dd")).toEqual("1999-12-01");
   });
 
   test("next year", () => {
@@ -99,7 +99,7 @@ describe("useCalendar tests", () => {
       result.current.nextYear();
     });
 
-    expect(format(result.current.currentDate, "yyyy-MM-dd")).toEqual("2001-01-01");
+    expect(format(result.current.focusedDate, "yyyy-MM-dd")).toEqual("2001-01-01");
   });
 
   test("previous year", () => {
@@ -110,6 +110,35 @@ describe("useCalendar tests", () => {
       result.current.previousYear();
     });
 
-    expect(format(result.current.currentDate, "yyyy-MM-dd")).toEqual("1999-01-01");
+    expect(format(result.current.focusedDate, "yyyy-MM-dd")).toEqual("1999-01-01");
+  });
+
+  test("isSelected", () => {
+    const value = new Date("2000-01-01");
+    const { result } = renderHook(() => useCalendar({ value }));
+
+    expect(result.current.isSelected(value)).toBeTruthy();
+    expect(result.current.isSelected(new Date("2001-11-11"))).toBeFalsy();
+  });
+
+  test("validate", () => {
+    const value = new Date("2000-01-02");
+    const { result } = renderHook(() => useCalendar({ value, validate: () => false }));
+
+    expect(result.current.days.reduce((acc, curr) => acc || curr.isValid, false)).toBeFalsy();
+  });
+
+  test("minDate", () => {
+    const value = new Date("2000-01-01");
+    const { result } = renderHook(() => useCalendar({ value, minDate: new Date("2001-01-01") }));
+
+    expect(result.current.days.reduce((acc, curr) => acc || curr.isValid, false)).toBeFalsy();
+  });
+
+  test("maxDate", () => {
+    const value = new Date("2000-01-01");
+    const { result } = renderHook(() => useCalendar({ value, maxDate: new Date("1999-01-01") }));
+
+    expect(result.current.days.reduce((acc, curr) => acc || curr.isValid, false)).toBeFalsy();
   });
 });

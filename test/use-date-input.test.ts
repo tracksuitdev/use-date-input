@@ -50,7 +50,7 @@ describe("useDateInput tests", () => {
     const { result } = renderHook(() => useTestingTarget({ onComplete }));
 
     act(() => {
-      result.current.resetValueOnChange(({ target: { value: "" } } as unknown) as ChangeEvent<HTMLInputElement>);
+      result.current.resetValueOnDelete(({ target: { value: "" } } as unknown) as ChangeEvent<HTMLInputElement>);
     });
 
     expect(onComplete).toHaveBeenCalled();
