@@ -3,10 +3,7 @@
   "license": "MIT",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
-  "files": [
-    "dist",
-    "src"
-  ],
+  "files": ["dist"],
   "engines": {
     "node": ">=10"
   },
@@ -21,6 +18,15 @@
   },
   "peerDependencies": {
     "react": ">=16"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "homepage": "https://github.com/tracksuitdev/use-date-input#readme",
+  "keywords": ["react", "hooks", "date input", "datepicker", "calendar"],
+  "repository": {
+    "url": "https://github.com/tracksuitdev/use-date-input",
+    "type": "git"
   },
   "husky": {
     "hooks": {
