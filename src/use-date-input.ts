@@ -76,6 +76,11 @@ function createMaskOptions(blocks: MaskedDateOptions["blocks"], pattern: string)
   };
 }
 
+/**
+ * Hook that manages state of masked date input.
+ *
+ * Uses IMask for input masking and date-fns for date formatting and parsing.
+ */
 export function useDateInput({ value, dateFormat, onComplete, maskBlocks }: UseDateInputProps): UseDateInput {
   const [inputValue, setInputValue] = useState(value ? format(value, dateFormat) : "");
   const options = useMemo(() => createMaskOptions(maskBlocks, dateFormat), [maskBlocks, dateFormat]);

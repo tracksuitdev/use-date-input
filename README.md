@@ -1,160 +1,252 @@
-# TSDX React User Guide
+# use-date-input
 
-Congrats! You just saved yourself hours of work by bootstrapping this project with TSDX. Let’s get you oriented with what’s here and how to use it.
+React hooks for building date input and datepicker components.
 
-> This TSDX setup is meant for developing React component libraries (not apps!) that can be published to NPM. If you’re looking to build a React-based app, you should use `create-react-app`, `razzle`, `nextjs`, `gatsby`, or `react-static`.
+* [useDateInput](#usedateinput)
+* [useCalendar](#usecalendar)
+* [useDatepicker](#usedatepicker)
 
-> If you’re new to TypeScript and React, checkout [this handy cheatsheet](https://github.com/sw-yx/react-typescript-cheatsheet/)
+## useDateInput
 
-## Commands
+▸ **useDateInput**(`props`: [`UseDateInputProps`](#props)): [`UseDateInput`](#returnvalue)
 
-TSDX scaffolds your new library inside `/src`, and also sets up a [Parcel-based](https://parceljs.org) playground for it inside `/example`.
+Hook that manages state of masked date input.
 
-The recommended workflow is to run TSDX in one terminal:
+Uses IMask for input masking and date-fns for date formatting and parsing.
 
-```bash
-npm start # or yarn start
+### Props
+**UseDateInputProps**
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `dateFormat` | `string` | date-fns date format, see [https://date-fns.org/v2.22.1/docs/format](https://date-fns.org/v2.22.1/docs/format) |
+| `maskBlocks?` | `MaskedDateOptions`[``"blocks"``] | Blocks defining each date part, see [https://imask.js.org/guide.html#masked-date](https://imask.js.org/guide.html#masked-date) for more info |
+| `onComplete?` | (`value?`: `Date`) => `void` | This will execute when input satisfies given format (mask), usually this function should be used to update date value|
+| `value?` | `Date` | Date value of input |
+
+### Return value
+**UseDateInput**
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `inputValue` | `string` | Value of input element |
+| `onKeyPress` | `KeyboardEventHandler` | Apply to input element if you wish to autocomplete date when user presses enter key. Parsing is done using dateFns parse with dateFormat truncated to the length of current inputValue and using current date as reference.  For example if today is 07/08/2021 and input value is 2, on enter press, input value will become 02/08/2021 |
+| `ref` | `RefObject`<`HTMLInputElement`\> | Input element ref |
+| `resetValueOnDelete` | `ChangeEventHandler`<`HTMLInputElement`\> | Will call onComplete with undefined value if e.target.value is falsy. Use it to reset value when user deletes the input. |
+| `setInputValue` | `Dispatch`<`SetStateAction`<`string`\>\> | Sets inputValue, note that you don't need to set input value on input element change, this is done internally by using IMask's accept event |
+
+
+### Usage
+```typescript jsx
+// define maskBlocks as constant or memoize in component
+const maskBlocks = {
+  dd: {
+    mask: IMask.MaskedRange,
+    from: 1,
+    to: 31,
+    maxLength: 2,
+  },
+  MM: {
+    mask: IMask.MaskedRange,
+    from: 1,
+    to: 12,
+    maxLength: 2,
+  },
+  yyyy: {
+    mask: IMask.MaskedRange,
+    from: 1900,
+    to: 9999,
+  },
+};
+
+const DateInput = () => {
+  const [value, setValue] = useState<Date>();
+  const { ref, inputValue, resetValueOnDelete } = useDateInput({
+    value,
+    dateFormat: "dd-MM-yyyy",
+    maskBlocks,
+    onComplete: setValue,
+  });
+
+  return <input ref={ref} value={inputValue} onChange={resetValueOnDelete} />;
+};
 ```
 
-This builds to `/dist` and runs the project in watch mode so any edits you save inside `src` causes a rebuild to `/dist`.
+## useCalendar
 
-Then run the example inside another:
+▸ **useCalendar**(`props`: [`UseCalendarProps`](#props-1)): [`UseCalendar`](#returnvalue-1)
 
-```bash
-cd example
-npm i # or yarn to install dependencies
-npm start # or yarn start
+Manages calendar state.
+
+You can use this hook to render calendar view. Focused date state is used as reference to return calendar days.
+
+Uses date-fns for date manipulation.
+
+### Props
+**UseCalendarProps**
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `maxDate?` | `Date` | Only dates before this date will be marked valid  For best performance memoize this date, this will prevent recalculation of calendar days on each render. |
+| `minDate?` | `Date` | Only dates after this date will be marked valid.  For best performance memoize this date, this will prevent recalculation of calendar days on each render. |
+| `startDate?` | `Date` | If provided calendar will start at the month of provided date |
+| `validate?` | (`date`: `Date`) => `boolean` | Validation function, dates that fail this test will be marked invalid. For best performance memoize this function, this will prevent recalculation of calendar days on each render. |
+| `value?` | `Date` | Datepicker value |
+| `weekStartsOn?` | ``0`` ``1``  ``2``  ``3``  ``4`` ``5`` ``6`` | Day that a week starts on. 0 - sunday, 1 - monday ..., default is 0 |
+
+### Return value
+**UseCalendar**
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `days` | [`UseDatepickerDay`](#usedatepickerday)[] | Returns all dates that can be seen in calendar view along with flags for each date that indicate if it is in the same month as focused date and if it is valid (available for selection).  Use this function to render month view of calendar. |
+| `focusedDate` | `Date` | First day of month that represents current calendar view |
+| `isSelected` | (`date`: `Date`) => `boolean` | Compares given date with value. |
+| `months` | `Date`[] | Dates representing each month in the same year as focusedDate.  You can use this function render month selection for calendar view. |
+| `nextMonth` | () => `void` | Adds one month to focusedDate. Use it to move calendar view to next month. |
+| `nextYear` | () => `void` | Adds one year to focusedDate. Use it to move calendar view to next year. |
+| `previousMonth` | () => `void` | Subtracts one month from focusedDate. Use it to move calendar view to previous month. |
+| `previousYear` | () => `void` | Adds one month to focusedDate. Use it to move calendar view to next month. |
+| `setFocusedDate` | `Dispatch`<`SetStateAction`<`Date`\>\> | Changes focusedDate, make sure to only pass first day of the month dates.  By changing focusedDate you are actually changing the reference point of calendar which means, once focused date is changed, days and months functions will use new focusedDate value as reference point. |
+| `years?` | `Date`[] | Dates representing eachYear from minDate to maxDate. Returns undefined if minDate or maxDate is not defined |
+
+#### UseDatePickerDay
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `date` | `Date` | Represents calendar day |
+| `inMonth` | `boolean` | Indicates if this date is in currently viewed calendar month |
+| `isValid` | `boolean` | If true this date can be selected according to provided min and max date and validate function |
+
+
+### Usage
+
+```typescript jsx
+const Calendar = () => {
+  const [value, setValue] = useState<Date>();
+  const { previousYear, nextYear, focusedDate, previousMonth, nextMonth, days, isSelected } = useCalendar({ value });
+
+  return (
+    <div style={{ width: "420px" }}>
+      <div style={{ width: "100%" }}>
+        <button onClick={previousYear}>{"<"}</button>
+        {format(focusedDate, "yyyy")}
+        <button onClick={nextYear}>{">"}</button>
+      </div>
+      <div style={{ width: "100%" }}>
+        <button onClick={previousMonth}>{"<"}</button>
+        {format(focusedDate, "MMMM")}
+        <button onClick={nextMonth}>{">"}</button>
+      </div>
+      <div style={{ display: "flex", flexWrap: "wrap" }}>
+        {days.map(({ date, inMonth }) => (
+          <button
+            disabled={!inMonth}
+            style={{ width: "60px", backgroundColor: isSelected(date) ? "aliceblue" : "initial" }}
+            key={date.toDateString()}
+            onClick={() => setValue(date)}>
+            {format(date, "d")}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
 ```
 
-The default example imports and live reloads whatever is in `/dist`, so if you are seeing an out of date component, make sure TSDX is running in watch mode like we recommend above. **No symlinking required**, we use [Parcel's aliasing](https://parceljs.org/module_resolution.html#aliases).
+## useDatepicker
 
-To do a one-off build, use `npm run build` or `yarn build`.
+▸ **useDatepicker**<`T`>([`props`](#props-2): [`UseCalendarProps`](#props-1) & [`UseDropdownProps`](https://github.com/tracksuitdev/use-dropdown#props)): [`UseCalendar`](#props-1) & [`UseDropdown`<`T`>](https://github.com/tracksuitdev/use-dropdown#return-value)
 
-To run tests, use `npm test` or `yarn test`.
+Combines useCalendar and useDropdown hooks into one.
 
-## Configuration
+### Props
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `additionalRefs?` | `RefObject`<`HTMLElement`\>[] | These refs will be used when determining what constitutes a click outside of dropdown. |
+| `disabled?` | `boolean` | If true, open and close will do nothing |
+| `onClose?` | () => `void` |  Executed when close is called |
+| `onOpen?` | () => `void` | Executed when open is called |
+| `maxDate?` | `Date` | Only dates before this date will be marked valid  For best performance memoize this date, this will prevent recalculation of calendar days on each render. |
+| `minDate?` | `Date` | Only dates after this date will be marked valid.  For best performance memoize this date, this will prevent recalculation of calendar days on each render. |
+| `startDate?` | `Date` | If provided calendar will start at the month of provided date |
+| `validate?` | (`date`: `Date`) => `boolean` | Validation function, dates that fail this test will be marked invalid. For best performance memoize this function, this will prevent recalculation of calendar days on each render. |
+| `value?` | `Date` | Datepicker value |
+| `weekStartsOn?` | ``0`` ``1``  ``2``  ``3``  ``4`` ``5`` ``6`` | Day that a week starts on. 0 - sunday, 1 - monday ..., default is 0 |
 
-Code quality is set up for you with `prettier`, `husky`, and `lint-staged`. Adjust the respective fields in `package.json` accordingly.
+### Return value
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `dropdownRef` | `RefObject`<`T`\> | Ref for dropdown element |
+| `isOpen` | `boolean` | Dropdown state |
+| `open` | () => `void` | Sets isOpen to true |
+| `close` | () => `void` | Sets isOpen to false |
+| `days` | [`UseDatepickerDay`](#usedatepickerday)[] | Returns all dates that can be seen in calendar view along with flags for each date that indicate if it is in the same month as focused date and if it is valid (available for selection).  Use this function to render month view of calendar. |
+| `focusedDate` | `Date` | First day of month that represents current calendar view |
+| `isSelected` | (`date`: `Date`) => `boolean` | Compares given date with value. |
+| `months` | `Date`[] | Dates representing each month in the same year as focusedDate.  You can use this function render month selection for calendar view. |
+| `nextMonth` | () => `void` | Adds one month to focusedDate. Use it to move calendar view to next month. |
+| `nextYear` | () => `void` | Adds one year to focusedDate. Use it to move calendar view to next year. |
+| `previousMonth` | () => `void` | Subtracts one month from focusedDate. Use it to move calendar view to previous month. |
+| `previousYear` | () => `void` | Adds one month to focusedDate. Use it to move calendar view to next month. |
+| `setFocusedDate` | `Dispatch`<`SetStateAction`<`Date`\>\> | Changes focusedDate, make sure to only pass first day of the month dates.  By changing focusedDate you are actually changing the reference point of calendar which means, once focused date is changed, days and months functions will use new focusedDate value as reference point. |
+| `years?` | `Date`[] | Dates representing eachYear from minDate to maxDate. Returns undefined if minDate or maxDate is not defined |
 
-### Jest
+### Usage
+```typescript jsx
+const DateInputWithDatepicker = () => {
+  const [value, setValue] = useState<Date>();
+  const { ref, inputValue, resetValueOnDelete } = useDateInput({
+    value,
+    dateFormat: "dd-MM-yyyy",
+    maskBlocks,
+    onComplete: setValue,
+  });
+  const {
+    isOpen,
+    open,
+    days,
+    previousYear,
+    nextYear,
+    previousMonth,
+    nextMonth,
+    focusedDate,
+    dropdownRef,
+    isSelected,
+  } = useDatepicker<HTMLDivElement>({
+    value,
+  });
 
-Jest tests are set up to run with `npm test` or `yarn test`.
-
-### Bundle analysis
-
-Calculates the real cost of your library using [size-limit](https://github.com/ai/size-limit) with `npm run size` and visulize it with `npm run analyze`.
-
-#### Setup Files
-
-This is the folder structure we set up for you:
-
-```txt
-/example
-  index.html
-  index.tsx       # test your component here in a demo app
-  package.json
-  tsconfig.json
-/src
-  index.tsx       # EDIT THIS
-/test
-  blah.test.tsx   # EDIT THIS
-.gitignore
-package.json
-README.md         # EDIT THIS
-tsconfig.json
+  return (
+    <div ref={dropdownRef}>
+      <input ref={ref} value={inputValue} onChange={resetValueOnDelete} onFocus={open} />
+      {isOpen && (
+        <div style={{ width: "420px" }}>
+          <div style={{ width: "100%" }}>
+            <button onClick={previousYear}>{"<"}</button>
+            {format(focusedDate, "yyyy")}
+            <button onClick={nextYear}>{">"}</button>
+          </div>
+          <div style={{ width: "100%" }}>
+            <button onClick={previousMonth}>{"<"}</button>
+            {format(focusedDate, "MMMM")}
+            <button onClick={nextMonth}>{">"}</button>
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap" }}>
+            {days.map(({ date, inMonth }) => (
+              <button
+                disabled={!inMonth}
+                style={{ width: "60px", backgroundColor: isSelected(date) ? "aliceblue" : "initial" }}
+                key={date.toDateString()}
+                onClick={() => setValue(date)}>
+                {format(date, "d")}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 ```
 
-#### React Testing Library
-
-We do not set up `react-testing-library` for you yet, we welcome contributions and documentation on this.
-
-### Rollup
-
-TSDX uses [Rollup](https://rollupjs.org) as a bundler and generates multiple rollup configs for various module formats and build settings. See [Optimizations](#optimizations) for details.
-
-### TypeScript
-
-`tsconfig.json` is set up to interpret `dom` and `esnext` types, as well as `react` for `jsx`. Adjust according to your needs.
-
-## Continuous Integration
-
-### GitHub Actions
-
-Two actions are added by default:
-
-- `main` which installs deps w/ cache, lints, tests, and builds on all pushes against a Node and OS matrix
-- `size` which comments cost comparison of your library on every pull request using [`size-limit`](https://github.com/ai/size-limit)
-
-## Optimizations
-
-Please see the main `tsdx` [optimizations docs](https://github.com/palmerhq/tsdx#optimizations). In particular, know that you can take advantage of development-only optimizations:
-
-```js
-// ./types/index.d.ts
-declare var __DEV__: boolean;
-
-// inside your code...
-if (__DEV__) {
-  console.log('foo');
-}
-```
-
-You can also choose to install and use [invariant](https://github.com/palmerhq/tsdx#invariant) and [warning](https://github.com/palmerhq/tsdx#warning) functions.
-
-## Module Formats
-
-CJS, ESModules, and UMD module formats are supported.
-
-The appropriate paths are configured in `package.json` and `dist/index.js` accordingly. Please report if any issues are found.
-
-## Deploying the Example Playground
-
-The Playground is just a simple [Parcel](https://parceljs.org) app, you can deploy it anywhere you would normally deploy that. Here are some guidelines for **manually** deploying with the Netlify CLI (`npm i -g netlify-cli`):
-
-```bash
-cd example # if not already in the example folder
-npm run build # builds to dist
-netlify deploy # deploy the dist folder
-```
-
-Alternatively, if you already have a git repo connected, you can set up continuous deployment with Netlify:
-
-```bash
-netlify init
-# build command: yarn build && cd example && yarn && yarn build
-# directory to deploy: example/dist
-# pick yes for netlify.toml
-```
-
-## Named Exports
-
-Per Palmer Group guidelines, [always use named exports.](https://github.com/palmerhq/typescript#exports) Code split inside your React app instead of your React library.
-
-## Including Styles
-
-There are many ways to ship styles, including with CSS-in-JS. TSDX has no opinion on this, configure how you like.
-
-For vanilla CSS, you can include it at the root directory and add it to the `files` section in your `package.json`, so that it can be imported separately by your users and run through their bundler's loader.
-
-## Publishing to NPM
-
-We recommend using [np](https://github.com/sindresorhus/np).
-
-## Usage with Lerna
-
-When creating a new package with TSDX within a project set up with Lerna, you might encounter a `Cannot resolve dependency` error when trying to run the `example` project. To fix that you will need to make changes to the `package.json` file _inside the `example` directory_.
-
-The problem is that due to the nature of how dependencies are installed in Lerna projects, the aliases in the example project's `package.json` might not point to the right place, as those dependencies might have been installed in the root of your Lerna project.
-
-Change the `alias` to point to where those packages are actually installed. This depends on the directory structure of your Lerna project, so the actual path might be different from the diff below.
-
-```diff
-   "alias": {
--    "react": "../node_modules/react",
--    "react-dom": "../node_modules/react-dom"
-+    "react": "../../../node_modules/react",
-+    "react-dom": "../../../node_modules/react-dom"
-   },
-```
-
-An alternative to fixing this problem would be to remove aliases altogether and define the dependencies referenced as aliases as dev dependencies instead. [However, that might cause other problems.](https://github.com/palmerhq/tsdx/issues/64)

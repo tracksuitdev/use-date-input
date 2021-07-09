@@ -30,11 +30,15 @@ export type UseCalendarProps = {
    */
   startDate?: Date;
   /**
-   * Only dates after this date will be marked valid
+   * Only dates after this date will be marked valid.
+   *
+   * For best performance memoize this date, this will prevent recalculation of calendar days on each render.
    */
   minDate?: Date;
   /**
    * Only dates before this date will be marked valid
+   *
+   * For best performance memoize this date, this will prevent recalculation of calendar days on each render.
    */
   maxDate?: Date;
   /**
@@ -43,6 +47,8 @@ export type UseCalendarProps = {
   weekStartsOn?: 0 | 1 | 2 | 3 | 4 | 5 | 6;
   /**
    * Validation function, dates that fail this test will be marked invalid
+   *
+   * For best performance memoize this function, this will prevent recalculation of calendar days on each render.
    */
   validate?: (date: Date) => boolean;
 };
@@ -123,7 +129,7 @@ export type UseCalendar = {
   /**
    * Compares given date with value.
    */
-  isSelected: (date: Date) => void;
+  isSelected: (date: Date) => boolean;
   /**
    * Adds one year to focusedDate. Use it to move calendar view to next year.
    */
@@ -145,9 +151,9 @@ export type UseCalendar = {
 /**
  * Manages calendar state.
  *
- * You can use this hook to render calendar view.
+ * You can use this hook to render calendar view. Focused date state is used as reference to return calendar days.
  *
- * Focused date state is used as reference to return calendar days.
+ * Uses date-fns for date manipulation.
  */
 export function useCalendar({
   value,
