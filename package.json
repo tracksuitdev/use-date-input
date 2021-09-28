@@ -19,7 +19,8 @@
     "analyze": "size-limit --why"
   },
   "peerDependencies": {
-    "react": ">=16"
+    "react": ">=16",
+    "date-fns": ">=2"
   },
   "publishConfig": {
     "access": "public"
@@ -70,11 +71,11 @@
     "size-limit": "^5.0.1",
     "tsdx": "^0.14.1",
     "tslib": "^2.3.0",
-    "typescript": "^4.3.4"
+    "typescript": "^4.3.4",
+    "date-fns": "^2.22.1"
   },
   "dependencies": {
     "@tracksuitdev/use-dropdown": "^1.0.0",
-    "date-fns": "^2.22.1",
-    "use-imask": "^1.0.1"
+    "use-imask": "^2.0.0"
   }
 }

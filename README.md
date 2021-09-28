@@ -6,6 +6,21 @@ React hooks for building date input and datepicker components.
 * [useCalendar](#usecalendar)
 * [useDatepicker](#usedatepicker)
 
+## Installation
+
+To use this hook you need to install [date-fns](https://date-fns.org/).
+```
+yarn add date-fns
+yarn add use-date-input
+```
+
+or with npm:
+
+```
+npm install date-fns
+npm install use-date-input
+```
+
 ## useDateInput
 
 ▸ **useDateInput**(`props`: [`UseDateInputProps`](#props)): [`UseDateInput`](#returnvalue)

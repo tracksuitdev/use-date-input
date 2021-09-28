@@ -84,7 +84,7 @@ function createMaskOptions(blocks: MaskedDateOptions["blocks"], pattern: string)
 export function useDateInput({ value, dateFormat, onComplete, maskBlocks }: UseDateInputProps): UseDateInput {
   const [inputValue, setInputValue] = useState(value ? format(value, dateFormat) : "");
   const options = useMemo(() => createMaskOptions(maskBlocks, dateFormat), [maskBlocks, dateFormat]);
-  const { ref, maskRef } = useIMask<MaskedDateOptions>(options, {
+  const [ref, maskRef] = useIMask<MaskedDateOptions>(options, {
     onComplete: (_, mask) => onComplete?.(mask?.typedValue),
     onAccept: (e, mask) => (e ? setInputValue(e.target.value) : setInputValue(mask?.value ?? "")),
   });
